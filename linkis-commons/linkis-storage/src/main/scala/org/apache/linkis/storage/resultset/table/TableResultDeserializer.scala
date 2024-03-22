@@ -82,7 +82,7 @@ class TableResultDeserializer extends ResultDeserializer[TableMetaData, TableRec
     val data = colArray.indices.map { i =>
       val len = colArray(i).toInt
       val res = Dolphin.getString(bytes, index, len)
-      if (res.length > LinkisStorageConf.LINKIS_RESULT_COL_LENGTH) {
+      if (res.length > LinkisStorageConf.LINKIS_RESULT_COL_LENGTH && !LinkisStorageConf.dataServiceFlag.get()) {
         throw new ColLengthExceedException(
           LinkisStorageErrorCodeSummary.RESULT_COL_LENGTH.getErrorCode,
           MessageFormat.format(
