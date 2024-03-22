@@ -154,6 +154,8 @@ class FileSplit(
     )
   }.asJava
 
+  def getFsReader(): FsReader[_ <: MetaData, _ <: Record] = fsReader
+
   // 如果不分页,则一直读,如果分页,则 count需要小于count
   def ifContinueRead: Boolean = !pageTrigger || count <= end
 

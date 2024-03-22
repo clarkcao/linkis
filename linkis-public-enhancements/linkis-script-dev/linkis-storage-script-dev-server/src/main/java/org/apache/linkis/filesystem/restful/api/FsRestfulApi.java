@@ -18,8 +18,7 @@
 package org.apache.linkis.filesystem.restful.api;
 
 import org.apache.linkis.common.conf.Configuration;
-import org.apache.linkis.common.io.FsPath;
-import org.apache.linkis.common.io.FsWriter;
+import org.apache.linkis.common.io.*;
 import org.apache.linkis.common.utils.ByteTimeUtils;
 import org.apache.linkis.common.utils.ResultSetUtils;
 import org.apache.linkis.filesystem.conf.WorkSpaceConfiguration;
@@ -40,9 +39,11 @@ import org.apache.linkis.storage.domain.FsPathListWithError;
 import org.apache.linkis.storage.excel.*;
 import org.apache.linkis.storage.exception.ColLengthExceedException;
 import org.apache.linkis.storage.fs.FileSystem;
+import org.apache.linkis.storage.resultset.StorageResultSetReader;
 import org.apache.linkis.storage.script.*;
 import org.apache.linkis.storage.source.FileSource;
 import org.apache.linkis.storage.source.FileSource$;
+import org.apache.linkis.storage.source.FileSplit;
 import org.apache.linkis.storage.utils.StorageUtils;
 
 import org.apache.commons.io.IOUtils;
@@ -609,11 +610,21 @@ public class FsRestfulApi {
     FileSource fileSource = null;
     try {
       fileSource = FileSource$.MODULE$.create(fsPath, fileSystem);
+
       if (nullValue != null && BLANK.equalsIgnoreCase(nullValue)) {
         nullValue = "";
       }
       if (FileSource$.MODULE$.isResultSet(fsPath.getPath())) {
         if (!StringUtils.isEmpty(nullValue)) {
+          // 专为数据服务开放结果集字符长度限制标识
+          if ("dataServiceFlag".equals(nullValue)){
+            FileSplit fileSplit = fileSource.getFileSplits()[0];
+            FsReader<? extends MetaData, ? extends Record> fsReader = fileSplit.getFsReader();
+            if (fsReader instanceof StorageResultSetReader){
+              StorageResultSetReader storageResultSetReader = (StorageResultSetReader) fsReader;
+              storageResultSetReader.setNoColLengthLimit(true);
+            }
+          }
           fileSource.addParams("nullValue", nullValue);
         }
         if (pageSize > FILESYSTEM_RESULTSET_ROW_LIMIT.getValue()) {

@@ -23,18 +23,12 @@ import org.apache.linkis.common.utils.{Logging, Utils}
 import org.apache.linkis.storage.conf.LinkisStorageConf
 import org.apache.linkis.storage.domain.Dolphin
 import org.apache.linkis.storage.errorcode.LinkisStorageErrorCodeSummary
-import org.apache.linkis.storage.exception.{
-  ColLengthExceedException,
-  StorageErrorCode,
-  StorageErrorException,
-  StorageWarnException
-}
+import org.apache.linkis.storage.exception.{ColLengthExceedException, StorageErrorCode, StorageErrorException, StorageWarnException}
 import org.apache.linkis.storage.resultset.table.TableMetaData
 import org.apache.linkis.storage.utils.StorageUtils
 
-import java.io.{ByteArrayInputStream, InputStream, IOException}
+import java.io.{ByteArrayInputStream, IOException, InputStream}
 import java.text.MessageFormat
-
 import scala.collection.mutable.ArrayBuffer
 
 class StorageResultSetReader[K <: MetaData, V <: Record](
@@ -50,6 +44,8 @@ class StorageResultSetReader[K <: MetaData, V <: Record](
 
   private var fs: Fs = _
 
+  private var noColLengthLimit: Boolean = false
+
   def this(resultSet: ResultSet[K, V], value: String) = {
     this(resultSet, new ByteArrayInputStream(value.getBytes(Dolphin.CHAR_SET)))
   }
@@ -62,6 +58,10 @@ class StorageResultSetReader[K <: MetaData, V <: Record](
           .getOrElse(resType, "TABLE")
       )
     }
+  }
+
+  def setNoColLengthLimit(limitFlag: Boolean): Unit = {
+     this.noColLengthLimit = limitFlag
   }
 
   /**
@@ -171,6 +171,10 @@ class StorageResultSetReader[K <: MetaData, V <: Record](
     }
     val line = readLine()
     if (line == null) return false
+    /** 专为数据服务开放结果集字符长度限制标识 */
+    if (noColLengthLimit && deserializer.isInstanceOf[StorageResultSetReader]) {
+      deserializer.asInstanceOf[StorageResultSetReader].setNoColLengthLimit(noColLengthLimit)
+    }
     row = deserializer.createRecord(line)
     if (row == null) return false
     true

@@ -34,6 +34,12 @@ class TableResultDeserializer extends ResultDeserializer[TableMetaData, TableRec
 
   import DataType._
 
+  private var noColLengthLimit: Boolean = false
+
+  def setNoColLengthLimit(limitFlag: Boolean): Unit = {
+    this.noColLengthLimit = limitFlag
+  }
+
   override def createMetaData(bytes: Array[Byte]): TableMetaData = {
     val colByteLen = Dolphin.getString(bytes, 0, Dolphin.INT_LEN).toInt
     val colString = Dolphin.getString(bytes, Dolphin.INT_LEN, colByteLen)
@@ -82,7 +88,7 @@ class TableResultDeserializer extends ResultDeserializer[TableMetaData, TableRec
     val data = colArray.indices.map { i =>
       val len = colArray(i).toInt
       val res = Dolphin.getString(bytes, index, len)
-      if (res.length > LinkisStorageConf.LINKIS_RESULT_COL_LENGTH) {
+      if (res.length > LinkisStorageConf.LINKIS_RESULT_COL_LENGTH && !noColLengthLimit) {
         throw new ColLengthExceedException(
           LinkisStorageErrorCodeSummary.RESULT_COL_LENGTH.getErrorCode,
           MessageFormat.format(
