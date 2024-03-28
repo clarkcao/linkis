@@ -562,6 +562,22 @@ public class FsRestfulApi {
     }
   }
 
+  /**
+   * Opens a file method. This method opens a file based on user requests and returns metadata and
+   * content of the file.
+   *
+   * @param req The HttpServletRequest object used to retrieve request information.
+   * @param path The file path, an optional parameter indicating the path of the file to be opened.
+   * @param page The requested page number, with a default value of 1.
+   * @param pageSize The number of rows per page, defaulting to 5000.
+   * @param nullValue A string representing a null value, defaulting to an empty string. If
+   *     specified, replaces null values with this string in query results.
+   * @param enableLimit A string indicating whether query limitations should be enabled, with a
+   *     default value of an empty string. If enabled, sets query limitations.
+   * @return A Message object containing file metadata, content, and related messages.
+   * @throws IOException Thrown if there's an I/O error.
+   * @throws WorkSpaceException Thrown if the file fails to open.
+   */
   @ApiOperation(value = "openFile", notes = "open file", response = Message.class)
   @ApiImplicitParams({
     @ApiImplicitParam(name = "path", required = false, dataType = "String", value = "Path"),
@@ -637,7 +653,19 @@ public class FsRestfulApi {
         LOGGER.info(
             "Finished to open File {}, taken {} ms", path, System.currentTimeMillis() - startTime);
         IOUtils.closeQuietly(fileSource);
-        message.data("metadata", result.getFirst()).data("fileContent", result.getSecond());
+        Object metaMap = result.getFirst();
+        try {
+          if (metaMap instanceof Map<String, String>) {
+            Map<String, String> stringStringMap = (Map<String, String>) metaMap;
+            if (stringStringMap.size() > LinkisStorageConf.LINKIS_RESULT_COLUMN_SIZE()) {
+              message.data("column_limit_display", true);
+            }
+          }
+        } catch (Exception e) {
+          LOGGER.info("Failed to set flag", e);
+        }
+
+        message.data("metadata", metaMap).data("fileContent", result.getSecond());
         message.data("type", fileSource.getFileSplits()[0].type());
         message.data("totalLine", fileSource.getTotalLine());
         return message.data("page", page).data("totalPage", 0);
