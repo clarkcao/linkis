@@ -18,6 +18,7 @@
 package org.apache.linkis.storage.resultset.table
 
 import org.apache.linkis.common.io.resultset.ResultDeserializer
+import org.apache.linkis.common.utils.Logging
 import org.apache.linkis.storage.conf.LinkisStorageConf
 import org.apache.linkis.storage.domain.{Column, DataType, Dolphin}
 import org.apache.linkis.storage.errorcode.LinkisStorageErrorCodeSummary
