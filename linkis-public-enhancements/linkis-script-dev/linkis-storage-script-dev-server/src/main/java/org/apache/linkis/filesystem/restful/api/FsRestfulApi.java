@@ -655,8 +655,8 @@ public class FsRestfulApi {
         IOUtils.closeQuietly(fileSource);
         Object metaMap = result.getFirst();
         try {
-          if (metaMap instanceof Map<String, String>) {
-            Map<String, String> stringStringMap = (Map<String, String>) metaMap;
+          if (metaMap instanceof Map) {
+            Map stringStringMap = (Map) metaMap;
             if (stringStringMap.size() > LinkisStorageConf.LINKIS_RESULT_COLUMN_SIZE()) {
               message.data("column_limit_display", true);
             }
