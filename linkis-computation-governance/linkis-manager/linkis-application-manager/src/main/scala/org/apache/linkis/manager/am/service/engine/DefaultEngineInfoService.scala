@@ -20,23 +20,20 @@ package org.apache.linkis.manager.am.service.engine
 import org.apache.linkis.common.ServiceInstance
 import org.apache.linkis.common.utils.{Logging, Utils}
 import org.apache.linkis.governance.common.entity.NodeExistStatus
-import org.apache.linkis.governance.common.protocol.engineconn.{
-  RequestEngineStatusBatch,
-  ResponseEngineStatusBatch
-}
+import org.apache.linkis.governance.common.protocol.engineconn.{RequestEngineStatusBatch, ResponseEngineStatusBatch}
 import org.apache.linkis.governance.common.utils.GovernanceConstant
 import org.apache.linkis.manager.am.manager.{EMNodeManager, EngineNodeManager}
+import org.apache.linkis.manager.common.entity.enumeration.NodeHealthy
 import org.apache.linkis.manager.common.entity.node.{EMNode, EngineNode}
 import org.apache.linkis.manager.label.builder.factory.LabelBuilderFactoryContext
 import org.apache.linkis.manager.label.service.NodeLabelService
 import org.apache.linkis.manager.rm.service.ResourceManager
+import org.apache.linkis.manager.service.common.pointer.NodePointerBuilder
 import org.apache.linkis.rpc.message.annotation.Receiver
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.util
-
 import scala.collection.JavaConverters._
 
 @Service
@@ -53,6 +50,9 @@ class DefaultEngineInfoService extends AbstractEngineService with EngineInfoServ
 
   @Autowired
   private var labelService: NodeLabelService = _
+
+  @Autowired
+  private var nodePointerBuilder: NodePointerBuilder = _
 
   private val labelBuilderFactory = LabelBuilderFactoryContext.getLabelBuilderFactory
 
@@ -142,4 +142,8 @@ class DefaultEngineInfoService extends AbstractEngineService with EngineInfoServ
     })
   }
 
+  override def updateEngineHealthyStatus(instance: ServiceInstance, healthy: NodeHealthy): Unit = {
+    engineNodeManager.getEngineNode(instance)
+
+  }
 }

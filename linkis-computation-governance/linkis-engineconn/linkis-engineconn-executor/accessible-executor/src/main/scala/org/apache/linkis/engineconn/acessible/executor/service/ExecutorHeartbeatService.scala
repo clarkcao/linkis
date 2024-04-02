@@ -18,6 +18,7 @@
 package org.apache.linkis.engineconn.acessible.executor.service
 
 import org.apache.linkis.engineconn.executor.entity.Executor
+import org.apache.linkis.manager.common.entity.enumeration.NodeHealthy
 import org.apache.linkis.manager.common.protocol.node.{NodeHeartbeatMsg, NodeHeartbeatRequest}
 
 trait ExecutorHeartbeatService {
@@ -28,6 +29,8 @@ trait ExecutorHeartbeatService {
    * @param executor
    */
   def reportHeartBeatMsg(executor: Executor): Unit
+
+  def reportHeartBeatMsgWithHealthy(executor: Executor, healthy: NodeHealthy): Unit
 
   def generateHeartBeatMsg(executor: Executor): NodeHeartbeatMsg
 

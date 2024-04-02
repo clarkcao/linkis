@@ -21,26 +21,18 @@ import org.apache.linkis.DataWorkCloudApplication
 import org.apache.linkis.common.utils.{Logging, Utils}
 import org.apache.linkis.engineconn.acessible.executor.conf.AccessibleExecutorConfiguration
 import org.apache.linkis.engineconn.acessible.executor.entity.AccessibleExecutor
-import org.apache.linkis.engineconn.acessible.executor.listener.event.{
-  ExecutorCompletedEvent,
-  ExecutorCreateEvent,
-  ExecutorStatusChangedEvent
-}
+import org.apache.linkis.engineconn.acessible.executor.listener.event.{ExecutorCompletedEvent, ExecutorCreateEvent, ExecutorStatusChangedEvent}
 import org.apache.linkis.engineconn.core.EngineConnObject
 import org.apache.linkis.engineconn.core.executor.ExecutorManager
 import org.apache.linkis.engineconn.core.hook.ShutdownHook
 import org.apache.linkis.engineconn.executor.entity.{Executor, SensibleExecutor}
 import org.apache.linkis.engineconn.executor.listener.ExecutorListenerBusContext
 import org.apache.linkis.engineconn.executor.service.ManagerService
-import org.apache.linkis.manager.common.entity.enumeration.NodeStatus
-import org.apache.linkis.manager.common.protocol.engine.{
-  EngineConnReleaseRequest,
-  EngineSuicideRequest
-}
-import org.apache.linkis.manager.common.protocol.node.{RequestNodeStatus, ResponseNodeStatus}
+import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
+import org.apache.linkis.manager.common.protocol.engine.{EngineConnReleaseRequest, EngineSuicideRequest}
+import org.apache.linkis.manager.common.protocol.node.{NodeHealthyRequest, RequestNodeStatus, ResponseNodeStatus}
 import org.apache.linkis.rpc.Sender
 import org.apache.linkis.rpc.message.annotation.Receiver
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.{ContextClosedEvent, EventListener}
 import org.springframework.stereotype.Service
@@ -63,6 +55,10 @@ class DefaultAccessibleService extends AccessibleService with Logging {
   private var lastStatus: NodeStatus = null
 
   private var lastThreadName: String = null
+
+  private var healthy: NodeHealthy = NodeHealthy.Healthy
+
+  private var setByManager: Boolean = false
 
   @Receiver
   override def dealEngineStopRequest(
@@ -148,6 +144,14 @@ class DefaultAccessibleService extends AccessibleService with Logging {
   }
 
   @Receiver
+  def dealNodeHealthyRequest(nodeHealthyRequest: NodeHealthyRequest): Unit = synchronized {
+    val toHealthy = nodeHealthyRequest.getNodeHealthy
+    logger.info(s"engine nodeHealthy from ${healthy} to ${toHealthy}")
+    this.setByManager = true
+    this.healthy = toHealthy
+  }
+
+  @Receiver
   override def dealRequestNodeStatus(requestNodeStatus: RequestNodeStatus): ResponseNodeStatus = {
     val status = if (EngineConnObject.isReady) {
       ExecutorManager.getInstance.getReportExecutor match {
@@ -218,7 +222,12 @@ class DefaultAccessibleService extends AccessibleService with Logging {
         )
         return
     }
-    executorHeartbeatService.reportHeartBeatMsg(reportExecutor)
+    if ( this.healthy == NodeHealthy.UnHealthy && this.setByManager ) {
+      executorHeartbeatService.reportHeartBeatMsgWithHealthy(reportExecutor, this.healthy)
+    } else {
+      executorHeartbeatService.reportHeartBeatMsg(reportExecutor)
+    }
+
   }
 
 }

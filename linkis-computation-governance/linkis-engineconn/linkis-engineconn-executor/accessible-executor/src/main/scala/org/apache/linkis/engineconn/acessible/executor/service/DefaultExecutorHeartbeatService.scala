@@ -19,11 +19,7 @@ package org.apache.linkis.engineconn.acessible.executor.service
 
 import org.apache.linkis.common.utils.{Logging, Utils}
 import org.apache.linkis.engineconn.acessible.executor.conf.AccessibleExecutorConfiguration
-import org.apache.linkis.engineconn.acessible.executor.info.{
-  NodeHealthyInfoManager,
-  NodeHeartbeatMsgManager,
-  NodeOverLoadInfoManager
-}
+import org.apache.linkis.engineconn.acessible.executor.info.{NodeHealthyInfoManager, NodeHeartbeatMsgManager, NodeOverLoadInfoManager}
 import org.apache.linkis.engineconn.acessible.executor.listener.NodeHealthyListener
 import org.apache.linkis.engineconn.acessible.executor.listener.event.NodeHealthyUpdateEvent
 import org.apache.linkis.engineconn.core.EngineConnObject
@@ -31,16 +27,14 @@ import org.apache.linkis.engineconn.core.executor.ExecutorManager
 import org.apache.linkis.engineconn.executor.entity.{Executor, ResourceExecutor, SensibleExecutor}
 import org.apache.linkis.engineconn.executor.listener.ExecutorListenerBusContext
 import org.apache.linkis.engineconn.executor.service.ManagerService
-import org.apache.linkis.manager.common.entity.enumeration.NodeStatus
+import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
 import org.apache.linkis.manager.common.protocol.node.{NodeHeartbeatMsg, NodeHeartbeatRequest}
 import org.apache.linkis.rpc.Sender
 import org.apache.linkis.rpc.message.annotation.Receiver
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import javax.annotation.PostConstruct
-
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -139,4 +133,11 @@ class DefaultExecutorHeartbeatService
     nodeHeartbeatMsg
   }
 
+  /** just used to set UnHealthy status by manager */
+  override def reportHeartBeatMsgWithHealthy(executor: Executor, healthy: NodeHealthy): Unit = {
+    val heartbeatMsg: NodeHeartbeatMsg = generateHeartBeatMsg(executor)
+    heartbeatMsg.getHealthyInfo.setNodeHealthy(healthy)
+    heartbeatMsg.getHealthyInfo.setMsg("set engine node healthy by manager.")
+    ManagerService.getManagerService.heartbeatReport(heartbeatMsg)
+  }
 }
