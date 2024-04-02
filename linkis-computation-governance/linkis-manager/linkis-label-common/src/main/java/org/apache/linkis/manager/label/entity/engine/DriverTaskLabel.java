@@ -31,11 +31,6 @@ public class DriverTaskLabel extends GenericLabel implements EngineNodeLabel {
     setLabelKey(LabelKeyConstant.DRIVER_TASK_KEY);
   }
 
-  @Override
-  public Feature getFeature() {
-    return Feature.CORE;
-  }
-
   public String getTaskId() {
     if (null == getValue()) {
       return null;
