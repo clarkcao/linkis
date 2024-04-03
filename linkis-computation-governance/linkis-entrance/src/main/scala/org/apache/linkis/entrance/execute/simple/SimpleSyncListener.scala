@@ -21,6 +21,7 @@ import org.apache.linkis.common.listener.Event
 import org.apache.linkis.common.utils.Logging
 import org.apache.linkis.entrance.EntranceServer
 import org.apache.linkis.entrance.conf.EntranceConfiguration
+import org.apache.linkis.governance.common.protocol.task.ResponseTaskStatus
 import org.apache.linkis.orchestrator.listener.OrchestratorSyncEvent
 import org.apache.linkis.orchestrator.listener.task.{
   TaskErrorResponseEvent,
@@ -69,13 +70,38 @@ class SimpleSyncListener extends TaskStatusListener with TaskResultSetListener w
     }
   }
 
-  override def onStatusUpdate(taskStatusEvent: TaskStatusEvent): Unit = {}
+  override def onStatusUpdate(taskStatusEvent: TaskStatusEvent): Unit = {
+    val maybeJob = entranceServer.getJob(taskStatusEvent.execTask.getId)
+    maybeJob.foreach(job => {
+      job.getExecutor match {
+        case executor: SimpleEntranceExecutor =>
+          ResponseTaskStatus(job.getId, taskStatusEvent.status)
+          executor.getEngineExecuteAsyncReturn.notify()
+        case _ =>
+          logger.warn(s"error executor $taskStatusEvent")
+      }
+    })
+  }
 
   override def onTaskErrorResponseEvent(taskErrorResponseEvent: TaskErrorResponseEvent): Unit = {}
 
-  override def onResultSetCreate(taskResultSetEvent: TaskResultSetEvent): Unit = {}
+  override def onResultSetCreate(taskResultSetEvent: TaskResultSetEvent): Unit = {
+    val maybeJob = entranceServer.getJob(taskResultSetEvent.execTask.getId)
+    maybeJob.foreach(job => {
+      entranceServer.getEntranceContext
+        .getOrCreatePersistenceManager()
+        .onResultSetCreated(job, null)
+    })
+  }
 
-  override def onResultSizeCreated(taskResultSetSizeEvent: TaskResultSetSizeEvent): Unit = {}
+  override def onResultSizeCreated(taskResultSetSizeEvent: TaskResultSetSizeEvent): Unit = {
+    val maybeJob = entranceServer.getJob(taskResultSetSizeEvent.execTask.getId)
+    maybeJob.foreach(job => {
+      entranceServer.getEntranceContext
+        .getOrCreatePersistenceManager()
+        .onResultSizeCreated(job, taskResultSetSizeEvent.resultSize)
+    })
+  }
 
   override def onSyncEvent(event: OrchestratorSyncEvent): Unit = {}
 

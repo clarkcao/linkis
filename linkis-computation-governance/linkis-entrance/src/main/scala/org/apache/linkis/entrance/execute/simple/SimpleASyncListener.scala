@@ -49,9 +49,21 @@ class SimpleASyncListener extends TaskLogListener with TaskProgressListener with
     }
   }
 
-  override def onLogUpdate(taskLogEvent: TaskLogEvent): Unit = {}
+  override def onLogUpdate(taskLogEvent: TaskLogEvent): Unit = {
+    val maybeJob = entranceServer.getJob(taskLogEvent.execTask.getId)
+    maybeJob.foreach(job => {
+      job.getLogListener.foreach(_.onLogUpdate(job, taskLogEvent.log))
+    })
+  }
 
-  override def onProgressOn(taskProgressEvent: TaskRunningInfoEvent): Unit = {}
+  override def onProgressOn(taskProgressEvent: TaskRunningInfoEvent): Unit = {
+    val maybeJob = entranceServer.getJob(taskProgressEvent.execTask.getId)
+    maybeJob.foreach(job => {
+      job.getProgressListener.foreach(
+        _.onProgressUpdate(job, taskProgressEvent.progress, taskProgressEvent.progressInfo)
+      )
+    })
+  }
 
   override def onEvent(event: OrchestratorAsyncEvent): Unit = {}
 

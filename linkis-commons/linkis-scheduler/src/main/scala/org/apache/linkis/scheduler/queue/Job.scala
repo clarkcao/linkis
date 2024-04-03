@@ -142,7 +142,8 @@ abstract class Job extends Runnable with SchedulerEvent with Closeable with Logg
   ): Unit = this.eventListenerBus = eventListenerBus
 
   def setExecutor(executor: Executor): Unit = this.executor = executor
-  protected def getExecutor = executor
+
+  def getExecutor: Executor = executor
 
   def setJobListener(jobListener: JobListener): Unit = this.jobListener = Some(jobListener)
 
