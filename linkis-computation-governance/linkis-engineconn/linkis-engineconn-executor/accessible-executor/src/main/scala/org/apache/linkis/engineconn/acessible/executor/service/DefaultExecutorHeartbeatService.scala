@@ -139,5 +139,6 @@ class DefaultExecutorHeartbeatService
     heartbeatMsg.getHealthyInfo.setNodeHealthy(healthy)
     heartbeatMsg.getHealthyInfo.setMsg("set engine node healthy by manager.")
     ManagerService.getManagerService.heartbeatReport(heartbeatMsg)
+    logger.info("report engine node heartBeatMsg with healthy by manager.")
   }
 }
