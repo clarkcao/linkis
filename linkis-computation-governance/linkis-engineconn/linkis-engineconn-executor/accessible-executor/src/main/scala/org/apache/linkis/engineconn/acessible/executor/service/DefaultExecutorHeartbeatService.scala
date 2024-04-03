@@ -28,7 +28,8 @@ import org.apache.linkis.engineconn.executor.entity.{Executor, ResourceExecutor,
 import org.apache.linkis.engineconn.executor.listener.ExecutorListenerBusContext
 import org.apache.linkis.engineconn.executor.service.ManagerService
 import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
-import org.apache.linkis.manager.common.protocol.node.{NodeHeartbeatMsg, NodeHeartbeatRequest}
+import org.apache.linkis.manager.common.entity.metrics.NodeHealthyInfo
+import org.apache.linkis.manager.common.protocol.node.{NodeHealthyRequest, NodeHeartbeatMsg, NodeHeartbeatRequest}
 import org.apache.linkis.rpc.Sender
 import org.apache.linkis.rpc.message.annotation.Receiver
 import org.springframework.beans.factory.annotation.Autowired
@@ -89,6 +90,15 @@ class DefaultExecutorHeartbeatService
       nodeHeartbeatRequest: NodeHeartbeatRequest
   ): NodeHeartbeatMsg = generateHeartBeatMsg(null)
 
+  @Receiver
+  def dealNodeHealthyRequest(nodeHealthyRequest: NodeHealthyRequest): Unit = synchronized {
+    val toHealthy = nodeHealthyRequest.getNodeHealthy
+    val healthyInfo: NodeHealthyInfo = nodeHealthyInfoManager.getNodeHealthyInfo()
+    logger.info(s"engine nodeHealthy from ${healthyInfo.getNodeHealthy} to ${toHealthy}")
+    nodeHealthyInfoManager.setByManager(true)
+    nodeHealthyInfoManager.setNodeHealthy(toHealthy)
+  }
+
   override def onNodeHealthyUpdate(nodeHealthyUpdateEvent: NodeHealthyUpdateEvent): Unit = {
     logger.warn(s"node healthy update, tiger heartbeatReport")
     // val executor = ExecutorManager.getInstance.getReportExecutor
@@ -133,12 +143,4 @@ class DefaultExecutorHeartbeatService
     nodeHeartbeatMsg
   }
 
-  /** just used to set UnHealthy status by manager */
-  override def reportHeartBeatMsgWithHealthy(executor: Executor, healthy: NodeHealthy): Unit = {
-    val heartbeatMsg: NodeHeartbeatMsg = generateHeartBeatMsg(executor)
-    heartbeatMsg.getHealthyInfo.setNodeHealthy(healthy)
-    heartbeatMsg.getHealthyInfo.setMsg("set engine node healthy by manager.")
-    ManagerService.getManagerService.heartbeatReport(heartbeatMsg)
-    logger.info("report engine node heartBeatMsg with healthy by manager.")
-  }
 }

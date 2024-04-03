@@ -20,29 +20,46 @@ package org.apache.linkis.engineconn.acessible.executor.info
 import org.apache.linkis.common.utils.Logging
 import org.apache.linkis.engineconn.acessible.executor.entity.AccessibleExecutor
 import org.apache.linkis.engineconn.core.executor.ExecutorManager
-import org.apache.linkis.manager.common.entity.enumeration.NodeStatus
+import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
 import org.apache.linkis.manager.common.entity.metrics.NodeHealthyInfo
-
 import org.springframework.stereotype.Component
 
 trait NodeHealthyInfoManager {
 
   def getNodeHealthyInfo(): NodeHealthyInfo
 
+  def setNodeHealthy(healthy: NodeHealthy): Unit
+
+  def setByManager(setByManager: Boolean): Unit
+
 }
 
 @Component
 class DefaultNodeHealthyInfoManager extends NodeHealthyInfoManager with Logging {
 
+  private var healthy: NodeHealthy = NodeHealthy.Healthy
+
+  private var setByManager: Boolean = false
+
   override def getNodeHealthyInfo(): NodeHealthyInfo = {
     val nodeHealthyInfo = new NodeHealthyInfo
     nodeHealthyInfo.setMsg("")
-    nodeHealthyInfo.setNodeHealthy(
-      NodeStatus.isEngineNodeHealthy(
-        ExecutorManager.getInstance.getReportExecutor.asInstanceOf[AccessibleExecutor].getStatus
-      )
+    var newHealthy: NodeHealthy = NodeStatus.isEngineNodeHealthy(
+      ExecutorManager.getInstance.getReportExecutor.asInstanceOf[AccessibleExecutor].getStatus
     )
+    /** 如果是manager主动设置的，则以manager设置的为准 */
+    if ( this.healthy == NodeHealthy.UnHealthy && this.setByManager ) {
+      newHealthy = this.healthy
+    }
+    nodeHealthyInfo.setNodeHealthy(newHealthy)
     nodeHealthyInfo
   }
 
+  override def setNodeHealthy(healthy: NodeHealthy): Unit = {
+    this.healthy = healthy
+  }
+
+  override def setByManager(setByManager: Boolean): Unit = {
+    this.setByManager = setByManager
+  }
 }
