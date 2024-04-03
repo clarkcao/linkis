@@ -20,7 +20,10 @@ package org.apache.linkis.manager.am.service.engine
 import org.apache.linkis.common.ServiceInstance
 import org.apache.linkis.common.utils.{Logging, Utils}
 import org.apache.linkis.governance.common.entity.NodeExistStatus
-import org.apache.linkis.governance.common.protocol.engineconn.{RequestEngineStatusBatch, ResponseEngineStatusBatch}
+import org.apache.linkis.governance.common.protocol.engineconn.{
+  RequestEngineStatusBatch,
+  ResponseEngineStatusBatch
+}
 import org.apache.linkis.governance.common.utils.GovernanceConstant
 import org.apache.linkis.manager.am.manager.{EMNodeManager, EngineNodeManager}
 import org.apache.linkis.manager.common.entity.enumeration.NodeHealthy
@@ -31,10 +34,12 @@ import org.apache.linkis.manager.label.service.NodeLabelService
 import org.apache.linkis.manager.rm.service.ResourceManager
 import org.apache.linkis.manager.service.common.pointer.NodePointerBuilder
 import org.apache.linkis.rpc.message.annotation.Receiver
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.util
+
 import scala.collection.JavaConverters._
 
 @Service
@@ -144,15 +149,12 @@ class DefaultEngineInfoService extends AbstractEngineService with EngineInfoServ
   }
 
   override def updateEngineHealthyStatus(instance: ServiceInstance, healthy: NodeHealthy): Unit = {
-    Utils.tryAndWarnMsg
-    {
+    Utils.tryAndWarnMsg {
       val node: EngineNode = engineNodeManager.getEngineNode(instance)
       val nodeHealthyRequest = new NodeHealthyRequest
       nodeHealthyRequest.setNodeHealthy(healthy)
       nodePointerBuilder.buildEngineNodePointer(node).updateNodeHealthyRequest(nodeHealthyRequest)
-      logger.info(
-        s"success to update healthy metric for instance: ${instance},${healthy}"
-      )
+      logger.info(s"success to update healthy metric for instance: ${instance},${healthy}")
     }(s"error to update healthy metric for instance: ${instance},${healthy}")
   }
 }

@@ -22,6 +22,7 @@ import org.apache.linkis.engineconn.acessible.executor.entity.AccessibleExecutor
 import org.apache.linkis.engineconn.core.executor.ExecutorManager
 import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
 import org.apache.linkis.manager.common.entity.metrics.NodeHealthyInfo
+
 import org.springframework.stereotype.Component
 
 trait NodeHealthyInfoManager {
@@ -47,8 +48,9 @@ class DefaultNodeHealthyInfoManager extends NodeHealthyInfoManager with Logging 
     var newHealthy: NodeHealthy = NodeStatus.isEngineNodeHealthy(
       ExecutorManager.getInstance.getReportExecutor.asInstanceOf[AccessibleExecutor].getStatus
     )
+
     /** 如果是manager主动设置的，则以manager设置的为准 */
-    if ( this.healthy == NodeHealthy.UnHealthy && this.setByManager ) {
+    if (this.healthy == NodeHealthy.UnHealthy && this.setByManager) {
       newHealthy = this.healthy
     }
     nodeHealthyInfo.setNodeHealthy(newHealthy)
@@ -62,4 +64,5 @@ class DefaultNodeHealthyInfoManager extends NodeHealthyInfoManager with Logging 
   override def setByManager(setByManager: Boolean): Unit = {
     this.setByManager = setByManager
   }
+
 }

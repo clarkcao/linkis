@@ -18,7 +18,10 @@
 package org.apache.linkis.manager.am.service.engine
 
 import org.apache.linkis.common.ServiceInstance
-import org.apache.linkis.governance.common.protocol.engineconn.{RequestEngineStatusBatch, ResponseEngineStatusBatch}
+import org.apache.linkis.governance.common.protocol.engineconn.{
+  RequestEngineStatusBatch,
+  ResponseEngineStatusBatch
+}
 import org.apache.linkis.manager.common.entity.enumeration.NodeHealthy
 import org.apache.linkis.manager.common.entity.node.{EMNode, EngineNode}
 

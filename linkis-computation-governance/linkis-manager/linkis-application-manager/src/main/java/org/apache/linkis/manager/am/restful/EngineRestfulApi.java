@@ -644,9 +644,9 @@ public class EngineRestfulApi {
       logger.info("success to update label of instance: " + serviceInstance.getInstance());
     }
 
-    //修改引擎健康状态，只支持 appconn 状态修改为 Unhealthy
+    // 修改引擎健康状态，只支持 appconn 状态修改为 Unhealthy
     String status = "Unhealthy";
-    if (status.equals(jsonNode.get("nodeHealthy").asText())){
+    if (status.equals(jsonNode.get("nodeHealthy").asText())) {
       engineInfoService.updateEngineHealthyStatus(serviceInstance, NodeHealthy.UnHealthy);
     }
 
