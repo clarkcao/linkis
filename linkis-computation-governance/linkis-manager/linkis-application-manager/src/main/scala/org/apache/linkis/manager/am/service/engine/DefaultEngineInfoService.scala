@@ -25,6 +25,7 @@ import org.apache.linkis.governance.common.utils.GovernanceConstant
 import org.apache.linkis.manager.am.manager.{EMNodeManager, EngineNodeManager}
 import org.apache.linkis.manager.common.entity.enumeration.NodeHealthy
 import org.apache.linkis.manager.common.entity.node.{EMNode, EngineNode}
+import org.apache.linkis.manager.common.protocol.node.NodeHealthyRequest
 import org.apache.linkis.manager.label.builder.factory.LabelBuilderFactoryContext
 import org.apache.linkis.manager.label.service.NodeLabelService
 import org.apache.linkis.manager.rm.service.ResourceManager
@@ -143,7 +144,15 @@ class DefaultEngineInfoService extends AbstractEngineService with EngineInfoServ
   }
 
   override def updateEngineHealthyStatus(instance: ServiceInstance, healthy: NodeHealthy): Unit = {
-    engineNodeManager.getEngineNode(instance)
-
+    Utils.tryAndWarnMsg
+    {
+      val node: EngineNode = engineNodeManager.getEngineNode(instance)
+      val nodeHealthyRequest = new NodeHealthyRequest
+      nodeHealthyRequest.setNodeHealthy(healthy)
+      nodePointerBuilder.buildEngineNodePointer(node).updateNodeHealthyRequest(nodeHealthyRequest)
+      logger.info(
+        s"success to update healthy metric for instance: ${instance},${healthy}"
+      )
+    }(s"error to update healthy metric for instance: ${instance},${healthy}")
   }
 }

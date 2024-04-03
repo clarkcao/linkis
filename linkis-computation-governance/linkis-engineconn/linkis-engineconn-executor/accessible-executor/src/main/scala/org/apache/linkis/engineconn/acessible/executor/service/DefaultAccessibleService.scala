@@ -144,9 +144,9 @@ class DefaultAccessibleService extends AccessibleService with Logging {
   }
 
   @Receiver
-  def dealNodeHealthyRequest(nodeHealthyRequest: NodeHealthyRequest): Unit = synchronized {
+  def updateNodeHealthyRequest(nodeHealthyRequest: NodeHealthyRequest): Unit = synchronized {
     val toHealthy = nodeHealthyRequest.getNodeHealthy
-    logger.info(s"engine nodeHealthy from ${healthy} to ${toHealthy}")
+    logger.info(s"update engine nodeHealthy from ${healthy} to ${toHealthy}")
     this.setByManager = true
     this.healthy = toHealthy
   }
