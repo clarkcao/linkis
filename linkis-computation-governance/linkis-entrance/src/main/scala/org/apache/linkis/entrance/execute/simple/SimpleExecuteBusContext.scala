@@ -15,10 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.linkis.entrance.execute
+package org.apache.linkis.entrance.execute.simple
 
-trait EngineLockListener {
-  def onEngineLocked(engine: EntranceExecutor, lock: String): Unit
+import org.apache.linkis.orchestrator.listener.OrchestratorListenerBusContext
 
-  def onEngineLockUsed(engine: EntranceExecutor): Unit
+object SimpleExecuteBusContext {
+
+  private lazy val orchestratorListenerBusContext = OrchestratorListenerBusContext.createBusContext
+
+  def getOrchestratorListenerBusContext(): OrchestratorListenerBusContext =
+    orchestratorListenerBusContext
+
 }

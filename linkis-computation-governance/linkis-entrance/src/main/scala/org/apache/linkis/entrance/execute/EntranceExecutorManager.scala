@@ -20,9 +20,12 @@ package org.apache.linkis.entrance.execute
 import org.apache.linkis.common.exception.WarnException
 import org.apache.linkis.common.log.LogUtils
 import org.apache.linkis.common.utils.{Logging, Utils}
+import org.apache.linkis.entrance.conf.EntranceConfiguration
 import org.apache.linkis.entrance.errorcode.EntranceErrorCodeSummary._
 import org.apache.linkis.entrance.exception.EntranceErrorException
+import org.apache.linkis.entrance.execute.simple.{SimpleEntranceExecutor, SimpleExecuteBusContext}
 import org.apache.linkis.governance.common.entity.job.JobRequest
+import org.apache.linkis.orchestrator.listener.OrchestratorListenerBusContext
 import org.apache.linkis.scheduler.executer.{Executor, ExecutorManager}
 import org.apache.linkis.scheduler.queue.{GroupFactory, Job, SchedulerEvent}
 
@@ -34,8 +37,6 @@ import scala.concurrent.duration.Duration
 abstract class EntranceExecutorManager(groupFactory: GroupFactory)
     extends ExecutorManager
     with Logging {
-
-  private val idGenerator = new AtomicLong(0)
 
   def getOrCreateInterceptors(): Array[ExecuteRequestInterceptor]
 
@@ -68,7 +69,6 @@ abstract class EntranceExecutorManager(groupFactory: GroupFactory)
             case t: Throwable => throw t
           }
         }
-        // todo check
         if (warnException != null && executor.isEmpty) throw warnException
         executor
     }
@@ -79,18 +79,23 @@ abstract class EntranceExecutorManager(groupFactory: GroupFactory)
   }
 
   override def getByGroup(groupName: String): Array[Executor] = {
-    // TODO
     null
   }
 
-  // todo  获取Orchestrator session； 切分job； 提交jobGroup；
   override protected def createExecutor(schedulerEvent: SchedulerEvent): EntranceExecutor =
     schedulerEvent match {
       case job: EntranceJob =>
         job.getJobRequest match {
           case jobReq: JobRequest =>
             val entranceEntranceExecutor =
-              new DefaultEntranceExecutor(jobReq.getId)
+              if (EntranceConfiguration.LINKIS_ENTRANCE_SKIP_ORCHESTRATOR) {
+                new SimpleEntranceExecutor(
+                  jobReq.getId,
+                  SimpleExecuteBusContext.getOrchestratorListenerBusContext()
+                )
+              } else {
+                new DefaultEntranceExecutor(jobReq.getId)
+              }
             // getEngineConn Executor
             job.getLogListener.foreach(
               _.onLogUpdate(
@@ -99,13 +104,6 @@ abstract class EntranceExecutorManager(groupFactory: GroupFactory)
               )
             )
             jobReq.setUpdatedTime(new Date(System.currentTimeMillis()))
-
-            /**
-             * // val engineConnExecutor = engineConnManager.getAvailableEngineConnExecutor(mark)
-             * idToEngines.put(entranceEntranceExecutor.getId, entranceEntranceExecutor)
-             */
-//          instanceToEngines.put(engineConnExecutor.getServiceInstance.getInstance, entranceEntranceExecutor) // todo
-//          entranceEntranceExecutor.setInterceptors(getOrCreateInterceptors()) // todo
             entranceEntranceExecutor
           case _ =>
             throw new EntranceErrorException(
