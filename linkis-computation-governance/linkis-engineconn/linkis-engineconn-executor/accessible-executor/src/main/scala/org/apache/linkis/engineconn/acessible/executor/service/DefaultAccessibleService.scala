@@ -21,7 +21,11 @@ import org.apache.linkis.DataWorkCloudApplication
 import org.apache.linkis.common.utils.{Logging, Utils}
 import org.apache.linkis.engineconn.acessible.executor.conf.AccessibleExecutorConfiguration
 import org.apache.linkis.engineconn.acessible.executor.entity.AccessibleExecutor
-import org.apache.linkis.engineconn.acessible.executor.listener.event.{ExecutorCompletedEvent, ExecutorCreateEvent, ExecutorStatusChangedEvent}
+import org.apache.linkis.engineconn.acessible.executor.listener.event.{
+  ExecutorCompletedEvent,
+  ExecutorCreateEvent,
+  ExecutorStatusChangedEvent
+}
 import org.apache.linkis.engineconn.core.EngineConnObject
 import org.apache.linkis.engineconn.core.executor.ExecutorManager
 import org.apache.linkis.engineconn.core.hook.ShutdownHook
@@ -29,10 +33,14 @@ import org.apache.linkis.engineconn.executor.entity.{Executor, SensibleExecutor}
 import org.apache.linkis.engineconn.executor.listener.ExecutorListenerBusContext
 import org.apache.linkis.engineconn.executor.service.ManagerService
 import org.apache.linkis.manager.common.entity.enumeration.NodeStatus
-import org.apache.linkis.manager.common.protocol.engine.{EngineConnReleaseRequest, EngineSuicideRequest}
+import org.apache.linkis.manager.common.protocol.engine.{
+  EngineConnReleaseRequest,
+  EngineSuicideRequest
+}
 import org.apache.linkis.manager.common.protocol.node.{RequestNodeStatus, ResponseNodeStatus}
 import org.apache.linkis.rpc.Sender
 import org.apache.linkis.rpc.message.annotation.Receiver
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.{ContextClosedEvent, EventListener}
 import org.springframework.stereotype.Service
@@ -55,7 +63,6 @@ class DefaultAccessibleService extends AccessibleService with Logging {
   private var lastStatus: NodeStatus = null
 
   private var lastThreadName: String = null
-
 
   @Receiver
   override def dealEngineStopRequest(
@@ -211,8 +218,7 @@ class DefaultAccessibleService extends AccessibleService with Logging {
         )
         return
     }
-      executorHeartbeatService.reportHeartBeatMsg(reportExecutor)
-
+    executorHeartbeatService.reportHeartBeatMsg(reportExecutor)
   }
 
 }
