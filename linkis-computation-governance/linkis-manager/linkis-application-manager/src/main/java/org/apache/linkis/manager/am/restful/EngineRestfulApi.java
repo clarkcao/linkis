@@ -644,13 +644,45 @@ public class EngineRestfulApi {
       logger.info("success to update label of instance: " + serviceInstance.getInstance());
     }
 
-    // 修改引擎健康状态，只支持 appconn 状态修改为 Unhealthy
-    String status = "Unhealthy";
-    if (status.equals(jsonNode.get("nodeHealthy").asText())) {
+    // 修改引擎健康状态，只支持 Healthy和 UnHealthy
+    String healthyKey = "Healthy";
+    String unHealthyKey = "UnHealthy";
+    if (healthyKey.equals(jsonNode.get("nodeHealthy").asText())) {
+      engineInfoService.updateEngineHealthyStatus(serviceInstance, NodeHealthy.Healthy);
+    } else if (unHealthyKey.equals(jsonNode.get("nodeHealthy").asText())) {
       engineInfoService.updateEngineHealthyStatus(serviceInstance, NodeHealthy.UnHealthy);
     }
-
     return Message.ok("success to update engine information(更新引擎信息成功)");
+  }
+
+  @ApiOperation(
+          value = "batchSetEngineToUnHealthy",
+          notes = "batch set engine to unHealthy",
+          response = Message.class)
+  @ApiImplicitParams({
+          @ApiImplicitParam(name = "instances", dataType = "String", example = "[{\"instance\":\"bdplinkis1001:38701\",\"engineType\":\"spark\",\"applicationName\":\"linkis-cg-engineconn\"}]")
+  })
+  @ApiOperationSupport(ignoreParameters = {"jsonNode"})
+  @RequestMapping(path = "/batchSetEngineToUnHealthy", method = RequestMethod.PUT)
+  public Message batchSetEngineToUnHealthy(HttpServletRequest req, @RequestBody JsonNode jsonNode)
+          throws AMErrorException {
+    String username = ModuleUserUtils.getOperationUser(req, "batchSetEngineToUnHealthy");
+    if (Configuration.isNotAdmin(username)) {
+      throw new AMErrorException(
+              210003, "Only admin can modify engineConn healthy info(只有管理员才能修改引擎健康信息).");
+    }
+
+    JsonNode instances = jsonNode.get("instances");
+    if (instances != null) {
+      Iterator<JsonNode> iterator = instances.iterator();
+      while (iterator.hasNext()) {
+        JsonNode instanceNode = iterator.next();
+        ServiceInstance serviceInstance = getServiceInstance(instanceNode);
+        engineInfoService.updateEngineHealthyStatus(serviceInstance, NodeHealthy.UnHealthy);
+      }
+    }
+    logger.info("success to batch update engine status to UnHealthy.");
+    return Message.ok("success to update engine information(批量更新引擎健康信息成功)");
   }
 
   @ApiOperation(

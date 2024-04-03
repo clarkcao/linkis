@@ -45,14 +45,15 @@ class DefaultNodeHealthyInfoManager extends NodeHealthyInfoManager with Logging 
   override def getNodeHealthyInfo(): NodeHealthyInfo = {
     val nodeHealthyInfo = new NodeHealthyInfo
     nodeHealthyInfo.setMsg("")
-    var newHealthy: NodeHealthy = NodeStatus.isEngineNodeHealthy(
-      ExecutorManager.getInstance.getReportExecutor.asInstanceOf[AccessibleExecutor].getStatus
-    )
-
     /** 如果是manager主动设置的，则以manager设置的为准 */
-    if (this.healthy == NodeHealthy.UnHealthy && this.setByManager) {
-      newHealthy = this.healthy
+    val newHealthy: NodeHealthy = if (this.setByManager) {
+      this.healthy
+    } else {
+      NodeStatus.isEngineNodeHealthy(
+        ExecutorManager.getInstance.getReportExecutor.asInstanceOf[AccessibleExecutor].getStatus
+      )
     }
+
     nodeHealthyInfo.setNodeHealthy(newHealthy)
     nodeHealthyInfo
   }
