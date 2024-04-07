@@ -650,7 +650,7 @@ public class EngineRestfulApi {
     JsonNode nodeHealthy = jsonNode.get("nodeHealthy");
     if (nodeHealthy != null && healthyKey.equals(nodeHealthy.asText())) {
       engineInfoService.updateEngineHealthyStatus(serviceInstance, NodeHealthy.Healthy);
-    } else if (unHealthyKey.equals(jsonNode.get("nodeHealthy").asText())) {
+    } else if (nodeHealthy != null && unHealthyKey.equals(nodeHealthy.asText())) {
       engineInfoService.updateEngineHealthyStatus(serviceInstance, NodeHealthy.UnHealthy);
     }
     return Message.ok("success to update engine information(更新引擎信息成功)");
