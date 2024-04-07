@@ -22,11 +22,7 @@ import org.apache.linkis.common.log.LogUtils
 import org.apache.linkis.common.utils.{Logging, Utils}
 import org.apache.linkis.engineconn.acessible.executor.entity.AccessibleExecutor
 import org.apache.linkis.engineconn.acessible.executor.info.DefaultNodeHealthyInfoManager
-import org.apache.linkis.engineconn.acessible.executor.listener.event.{
-  TaskLogUpdateEvent,
-  TaskResponseErrorEvent,
-  TaskStatusChangedEvent
-}
+import org.apache.linkis.engineconn.acessible.executor.listener.event.{TaskLogUpdateEvent, TaskResponseErrorEvent, TaskStatusChangedEvent}
 import org.apache.linkis.engineconn.common.conf.{EngineConnConf, EngineConnConstant}
 import org.apache.linkis.engineconn.computation.executor.conf.ComputationExecutorConf
 import org.apache.linkis.engineconn.computation.executor.entity.EngineConnTask
@@ -43,27 +39,19 @@ import org.apache.linkis.governance.common.paser.CodeParser
 import org.apache.linkis.governance.common.protocol.task.{EngineConcurrentInfo, RequestTask}
 import org.apache.linkis.governance.common.utils.{JobUtils, LoggerUtils}
 import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
-import org.apache.linkis.manager.label.entity.engine.{
-  CodeLanguageLabel,
-  EngineType,
-  EngineTypeLabel,
-  RunType,
-  UserCreatorLabel
-}
+import org.apache.linkis.manager.label.entity.engine.{CodeLanguageLabel, EngineType, EngineTypeLabel, RunType, UserCreatorLabel}
 import org.apache.linkis.manager.label.utils.LabelUtil
 import org.apache.linkis.protocol.engine.JobProgressInfo
 import org.apache.linkis.scheduler.executer._
-
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-
 import scala.collection.JavaConverters._
-
 import DataWorkCloudApplication.getApplicationContext
 import com.google.common.cache.{Cache, CacheBuilder}
+import org.apache.linkis.engineconn.acessible.executor.utils.AccessibleExecutorUtils.currentEngineIsUnHealthy
 
 abstract class ComputationExecutor(val outputPrintLimit: Int = 1000)
     extends AccessibleExecutor
@@ -191,15 +179,9 @@ abstract class ComputationExecutor(val outputPrintLimit: Int = 1000)
     }
 
     // unhealthy node should try to shutdown
-    val manager: DefaultNodeHealthyInfoManager =
-      getApplicationContext.getBean(classOf[DefaultNodeHealthyInfoManager])
-    if (manager == null) {
-      logger.warn("DefaultNodeHealthyInfoManager is null")
-    } else if (manager.getNodeHealthy() == NodeHealthy.UnHealthy) {
-      if (runningTasks.getCount() == 0) {
-        logger.info("no task running and ECNode is unHealthy, now to mark engine to Finished.")
-        ExecutorManager.getInstance.getReportExecutor.tryShutdown()
-      }
+    if (runningTasks.getCount() == 0 && currentEngineIsUnHealthy) {
+      logger.info("no task running and ECNode is unHealthy, now to mark engine to Finished.")
+      ExecutorManager.getInstance.getReportExecutor.tryShutdown()
     }
 
   }
