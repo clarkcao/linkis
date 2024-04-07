@@ -20,6 +20,7 @@ package org.apache.linkis.engineconn.computation.executor.async
 import org.apache.linkis.DataWorkCloudApplication
 import org.apache.linkis.common.log.LogUtils
 import org.apache.linkis.common.utils.Utils
+import org.apache.linkis.engineconn.acessible.executor.info.DefaultNodeHealthyInfoManager
 import org.apache.linkis.engineconn.acessible.executor.listener.event.TaskResponseErrorEvent
 import org.apache.linkis.engineconn.common.conf.EngineConnConf
 import org.apache.linkis.engineconn.computation.executor.entity.EngineConnTask
@@ -37,7 +38,7 @@ import org.apache.linkis.engineconn.executor.listener.{
 }
 import org.apache.linkis.governance.common.entity.ExecutionNodeStatus
 import org.apache.linkis.governance.common.utils.{JobUtils, LoggerUtils}
-import org.apache.linkis.manager.common.entity.enumeration.NodeStatus
+import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
 import org.apache.linkis.manager.label.entity.entrance.ExecuteOnceLabel
 import org.apache.linkis.protocol.engine.JobProgressInfo
 import org.apache.linkis.scheduler.executer._
@@ -50,6 +51,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 
 import java.util
 import java.util.concurrent.ConcurrentHashMap
+
+import DataWorkCloudApplication.getApplicationContext
 
 abstract class AsyncConcurrentComputationExecutor(override val outputPrintLimit: Int = 1000)
     extends ComputationExecutor(outputPrintLimit)
@@ -264,6 +267,19 @@ abstract class AsyncConcurrentComputationExecutor(override val outputPrintLimit:
           if (!hasTaskRunning()) {
             logger.warn(
               s"engineConnTask(${asyncEngineConnJob.getEngineConnTask.getTaskId}) is execute once, now to mark engine to Finished"
+            )
+            ExecutorManager.getInstance.getReportExecutor.tryShutdown()
+          }
+        }
+        // unhealthy node should try to shutdown
+        val manager: DefaultNodeHealthyInfoManager =
+          getApplicationContext.getBean(classOf[DefaultNodeHealthyInfoManager])
+        if (manager == null) {
+          logger.warn("DefaultNodeHealthyInfoManager is null")
+        } else if (manager.getNodeHealthy() == NodeHealthy.UnHealthy) {
+          if (!hasTaskRunning()) {
+            logger.info(
+              s"engineConnTask(${asyncEngineConnJob.getEngineConnTask.getTaskId}) is unHealthy, now to mark engine to Finished"
             )
             ExecutorManager.getInstance.getReportExecutor.tryShutdown()
           }

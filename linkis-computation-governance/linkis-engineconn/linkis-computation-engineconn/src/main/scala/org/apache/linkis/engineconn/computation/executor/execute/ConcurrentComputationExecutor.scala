@@ -17,11 +17,13 @@
 
 package org.apache.linkis.engineconn.computation.executor.execute
 
+import org.apache.linkis.DataWorkCloudApplication.getApplicationContext
+import org.apache.linkis.engineconn.acessible.executor.info.DefaultNodeHealthyInfoManager
 import org.apache.linkis.engineconn.computation.executor.conf.ComputationExecutorConf
 import org.apache.linkis.engineconn.computation.executor.entity.EngineConnTask
 import org.apache.linkis.engineconn.core.executor.ExecutorManager
 import org.apache.linkis.engineconn.executor.entity.ConcurrentExecutor
-import org.apache.linkis.manager.common.entity.enumeration.NodeStatus
+import org.apache.linkis.manager.common.entity.enumeration.{NodeHealthy, NodeStatus}
 import org.apache.linkis.manager.label.entity.entrance.ExecuteOnceLabel
 import org.apache.linkis.scheduler.executer.ExecuteResponse
 
@@ -72,6 +74,17 @@ abstract class ConcurrentComputationExecutor(override val outputPrintLimit: Int 
         logger.warn(
           s"engineConnTask(${engineConnTask.getTaskId}) is execute once, now to mark engine to Finished"
         )
+        ExecutorManager.getInstance.getReportExecutor.tryShutdown()
+      }
+    }
+    // unhealthy node should try to shutdown
+    val manager: DefaultNodeHealthyInfoManager =
+      getApplicationContext.getBean(classOf[DefaultNodeHealthyInfoManager])
+    if (manager == null) {
+      logger.warn("DefaultNodeHealthyInfoManager is null")
+    } else if (manager.getNodeHealthy() == NodeHealthy.UnHealthy) {
+      if (!hasTaskRunning()) {
+        logger.info("no task running and ECNode is unHealthy, now to mark engine to Finished.")
         ExecutorManager.getInstance.getReportExecutor.tryShutdown()
       }
     }
