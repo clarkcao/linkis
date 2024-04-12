@@ -89,6 +89,18 @@ object UJESClientFactory extends Logging {
       }
     }
     if (!versioned) clientConfigBuilder.setDWSVersion("v" + DEFAULT_VERSION)
+    val sslEnabled =
+      if (
+          props
+            .containsKey(USE_SSL) && "true".equalsIgnoreCase(props.getProperty(USE_SSL))
+      ) {
+        true
+      } else {
+        false
+      }
+    if (sslEnabled) {
+      clientConfigBuilder.setSSL(sslEnabled)
+    }
     UJESClient(clientConfigBuilder.build())
   }
 
