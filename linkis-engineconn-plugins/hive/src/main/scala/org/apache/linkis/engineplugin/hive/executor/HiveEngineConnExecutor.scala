@@ -34,6 +34,7 @@ import org.apache.linkis.engineplugin.hive.errorcode.HiveErrorCodeSummary.{
 }
 import org.apache.linkis.engineplugin.hive.exception.HiveQueryFailedException
 import org.apache.linkis.engineplugin.hive.progress.HiveProgressHelper
+import org.apache.linkis.governance.common.constant.job.JobRequestConstants
 import org.apache.linkis.governance.common.paser.SQLCodeParser
 import org.apache.linkis.governance.common.utils.JobUtils
 import org.apache.linkis.hadoop.common.conf.HadoopConf
@@ -162,6 +163,17 @@ class HiveEngineConnExecutor(
     val tokens = realCode.trim.split("""\s+""")
     SessionState.setCurrentSessionState(sessionState)
     sessionState.setLastCommand(code)
+    if (
+        engineExecutorContext.getCurrentParagraph == 1 && engineExecutorContext.getProperties
+          .containsKey(JobRequestConstants.LINKIS_JDBC_DEFAULT_DB)
+    ) {
+      val defaultDB =
+        engineExecutorContext.getProperties
+          .get(JobRequestConstants.LINKIS_JDBC_DEFAULT_DB)
+          .asInstanceOf[String]
+      logger.info(s"set default DB to $defaultDB")
+      sessionState.setCurrentDatabase(defaultDB)
+    }
     val proc = CommandProcessorFactory.get(tokens, hiveConf)
     this.proc = proc
     LOG.debug("ugi is " + ugi.getUserName)
