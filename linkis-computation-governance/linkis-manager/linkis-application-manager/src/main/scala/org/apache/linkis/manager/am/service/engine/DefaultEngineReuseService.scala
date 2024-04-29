@@ -153,7 +153,7 @@ class DefaultEngineReuseService extends AbstractEngineService with EngineReuseSe
       getEngineNodeManager.getEngineNodes(instances.asScala.keys.toSeq.toArray)
 
     // 获取需要的资源
-    if (AMConfiguration.NODE_SELECT_HOTSPOT_EXCLUSION_RULE) {
+    if (AMConfiguration.EC_REUSE_WITH_RESOURCE_RULE_ENABLE) {
       val labels: util.List[Label[_]] =
         engineCreateService.buildLabel(engineReuseRequest.getLabels, engineReuseRequest.getUser)
       if (engineReuseRequest.getProperties == null) {
