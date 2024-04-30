@@ -171,7 +171,7 @@ class DefaultEngineReuseService extends AbstractEngineService with EngineReuseSe
           engine.getNodeResource.getUsedResource.asInstanceOf[LoadInstanceResource]
         val needResource: LoadInstanceResource =
           resource.getUsedResource.asInstanceOf[LoadInstanceResource]
-        usedResource.memory > needResource.memory && usedResource.cores > needResource.cores
+        usedResource.memory >= needResource.memory && usedResource.cores >= needResource.cores
       })
       if (engineScoreList.isEmpty) {
         throw new LinkisRetryException(
