@@ -166,13 +166,9 @@ class DefaultEngineReuseService extends AbstractEngineService with EngineReuseSe
         AMConfiguration.ENGINE_START_MAX_TIME.getValue.toLong
       )
       // 过滤掉资源不满足的引擎
-      engineScoreList = engineScoreList.filter(engine => {
-        val usedResource: LoadInstanceResource =
-          engine.getNodeResource.getUsedResource.asInstanceOf[LoadInstanceResource]
-        val needResource: LoadInstanceResource =
-          resource.getUsedResource.asInstanceOf[LoadInstanceResource]
-        usedResource.memory >= needResource.memory && usedResource.cores >= needResource.cores
-      })
+      engineScoreList = engineScoreList.filter(engine =>
+        engine.getNodeResource.getUsedResource >= resource.getUsedResource
+      )
       if (engineScoreList.isEmpty) {
         throw new LinkisRetryException(
           AMConstant.ENGINE_ERROR_CODE,
