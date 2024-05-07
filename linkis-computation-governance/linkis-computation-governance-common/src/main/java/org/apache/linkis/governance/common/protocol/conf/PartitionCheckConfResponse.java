@@ -23,11 +23,9 @@ public class PartitionCheckConfResponse {
 
   private String desc;
 
-  public PartitionCheckConfResponse(){
+  public PartitionCheckConfResponse() {}
 
-  }
-
-  public PartitionCheckConfResponse(boolean checkStatus, String desc){
+  public PartitionCheckConfResponse(boolean checkStatus, String desc) {
     this.checkStatus = checkStatus;
     this.desc = desc;
   }

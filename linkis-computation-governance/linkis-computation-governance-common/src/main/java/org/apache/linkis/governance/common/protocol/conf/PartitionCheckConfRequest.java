@@ -34,5 +34,4 @@ public class PartitionCheckConfRequest implements RequestProtocol {
   public String getCode() {
     return code;
   }
-
 }
