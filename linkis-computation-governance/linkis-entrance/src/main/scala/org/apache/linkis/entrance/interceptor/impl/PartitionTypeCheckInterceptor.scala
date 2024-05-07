@@ -40,7 +40,7 @@ class PartitionTypeCheckInterceptor extends EntranceInterceptor with Logging{
         if (VALIDATOR_PARTITION_CHECK_ENABLE.getValue) {
           Utils.tryAndWarn{
             val sender: Sender = Sender.getSender(EntranceConfiguration.VALIDATOR_APPLICATION_NAME.getValue)
-            val request = PartitionCheckConfRequest
+            val request = new PartitionCheckConfRequest(jobRequest.getExecutionCode)
             val response: PartitionCheckConfResponse = sender.ask(request).asInstanceOf[PartitionCheckConfResponse]
             if (!response.isCheckStatus) {
               throw PartitionCheckException(50082, "partition column type checkfailed!(分区字段类型校验失败！): " + response.getDesc)
