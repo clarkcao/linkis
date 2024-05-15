@@ -38,7 +38,7 @@ abstract class UJESClient extends Closeable {
   def submit(jobSubmitAction: JobSubmitAction): JobSubmitResult =
     executeUJESJob(jobSubmitAction).asInstanceOf[JobSubmitResult]
 
-  protected[client] def executeUJESJob(ujesJobAction: UJESJobAction): Result
+  def executeUJESJob(ujesJobAction: UJESJobAction): Result
 
   private def executeJobExecIdAction[T](
       jobExecuteResult: JobExecuteResult,
