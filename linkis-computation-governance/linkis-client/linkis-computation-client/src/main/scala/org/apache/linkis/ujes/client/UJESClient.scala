@@ -55,6 +55,12 @@ abstract class UJESClient extends Closeable with Logging {
     executeUJESJob(jobExecIdAction).asInstanceOf[T]
   }
 
+  /**
+   * only get the status of the cache
+   * Task status should be based on getJobInfo
+   * @param jobExecuteResult
+   * @return
+   */
   def status(jobExecuteResult: JobExecuteResult): JobStatusResult =
     executeJobExecIdAction(jobExecuteResult, JobServiceType.JobStatus)
 
