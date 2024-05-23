@@ -1353,7 +1353,6 @@ public class FsRestfulApi {
     if (StringUtils.isEmpty(restultPath)) {
       return Message.error(MessageFormat.format(PARAMETER_NOT_BLANK, "restultPath"));
     }
-
     if (!WorkspaceUtil.restultRegexPattern.matcher(restultPath).find()) {
       return Message.error(MessageFormat.format(FILEPATH_ILLEGAL_SYMBOLS, restultPath));
     }
