@@ -22,33 +22,31 @@ import org.apache.linkis.metadata.query.common.domain.MetaColumnInfo;
 import org.apache.linkis.metadata.query.common.service.AbstractDbMetaService;
 import org.apache.linkis.metadata.query.common.service.MetadataConnection;
 import org.apache.linkis.metadata.query.service.conf.SqlParamsMapper;
-import org.apache.linkis.metadata.query.service.mysql.SqlConnection;
-
-import org.springframework.stereotype.Component;
+import org.apache.linkis.metadata.query.service.starrocks.SqlConnection;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
 public class StarrocksMetaService extends AbstractDbMetaService<SqlConnection> {
+
   @Override
   public MetadataConnection<SqlConnection> getConnection(
-          String operator, Map<String, Object> params) throws Exception {
+      String operator, Map<String, Object> params) throws Exception {
     String host =
-            String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_HOST.getValue(), ""));
+        String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_HOST.getValue(), ""));
     Integer port =
-            (Double.valueOf(
-                    String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_PORT.getValue(), 0))))
-                    .intValue();
+        (Double.valueOf(
+                String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_PORT.getValue(), 0))))
+            .intValue();
     String username =
-            String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_USERNAME.getValue(), ""));
+        String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_USERNAME.getValue(), ""));
     String password =
-            String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_PASSWORD.getValue(), ""));
+        String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_PASSWORD.getValue(), ""));
 
     String database =
-            String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_DATABASE.getValue(), ""));
+        String.valueOf(params.getOrDefault(SqlParamsMapper.PARAM_SQL_DATABASE.getValue(), ""));
     Map<String, Object> extraParams = new HashMap<>();
     Object sqlParamObj = params.get(SqlParamsMapper.PARAM_SQL_EXTRA_PARAMS.getValue());
     if (null != sqlParamObj) {
@@ -61,7 +59,7 @@ public class StarrocksMetaService extends AbstractDbMetaService<SqlConnection> {
     }
     assert extraParams != null;
     return new MetadataConnection<>(
-            new SqlConnection(host, port, username, password, database, extraParams));
+        new SqlConnection(host, port, username, password, database, extraParams));
   }
 
   @Override
@@ -84,7 +82,7 @@ public class StarrocksMetaService extends AbstractDbMetaService<SqlConnection> {
 
   @Override
   public List<MetaColumnInfo> queryColumns(
-          SqlConnection connection, String database, String table) {
+      SqlConnection connection, String database, String table) {
     try {
       return connection.getColumns(database, table);
     } catch (SQLException | ClassNotFoundException e) {
