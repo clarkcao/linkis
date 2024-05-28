@@ -45,11 +45,11 @@ public enum RMErrorCode implements LinkisErrorCode {
 
   QUEUE_MEMORY_INSUFFICIENT(
       12002,
-      "Insufficient queue memory resources, reduce the executor memory(queue内存资源不足，减少executor内存)"),
+      "Insufficient queue memory resources, reduce the executor memory(queue内存资源不足，减少executor内存，参数配置-应用-spark：spark.executor.memory)"),
 
   QUEUE_CPU_INSUFFICIENT(
       12001,
-      "Queue CPU resources are insufficient, reduce the number of executors.(队列CPU资源不足，建议调小执行器个数)"),
+      "Queue CPU resources are insufficient, reduce the number of executors.(队列CPU资源不足，建议调小执行器个数，参数配置-应用-spark：spark.executor.cores)"),
 
   QUEUE_INSTANCES_INSUFFICIENT(
       12003,
