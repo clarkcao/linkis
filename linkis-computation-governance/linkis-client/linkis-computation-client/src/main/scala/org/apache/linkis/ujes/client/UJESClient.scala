@@ -56,8 +56,7 @@ abstract class UJESClient extends Closeable with Logging {
   }
 
   /**
-   * only get the status of the cache
-   * Task status should be based on getJobInfo
+   * only get the status of the cache Task status should be based on getJobInfo
    * @param jobExecuteResult
    * @return
    */
