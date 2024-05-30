@@ -1341,28 +1341,28 @@ public class FsRestfulApi {
     }
   }
 
-  @ApiOperation(value = "encrypt-path", notes = "encrypt restult path", response = Message.class)
+  @ApiOperation(value = "encrypt-path", notes = "encrypt file path", response = Message.class)
   @ApiImplicitParams({
-    @ApiImplicitParam(name = "restultPath", required = false, dataType = "String", value = "Path")
+    @ApiImplicitParam(name = "filePath", required = true, dataType = "String", value = "Path")
   })
   @RequestMapping(path = "/encrypt-path", method = RequestMethod.GET)
   public Message encryptPath(
       HttpServletRequest req,
-      @RequestParam(value = "restultPath", required = false) String restultPath) {
-    ModuleUserUtils.getOperationUser(req, "encrypt-path " + restultPath);
-    if (StringUtils.isEmpty(restultPath)) {
+      @RequestParam(value = "filePath", required = false) String filePath) {
+    ModuleUserUtils.getOperationUser(req, "encrypt-path " + filePath);
+    if (StringUtils.isEmpty(filePath)) {
       return Message.error(MessageFormat.format(PARAMETER_NOT_BLANK, "restultPath"));
     }
-    if (!WorkspaceUtil.restultRegexPattern.matcher(restultPath).find()) {
-      return Message.error(MessageFormat.format(FILEPATH_ILLEGAL_SYMBOLS, restultPath));
+    if (!WorkspaceUtil.filePathRegexPattern.matcher(filePath).find()) {
+      return Message.error(MessageFormat.format(FILEPATH_ILLEGAL_SYMBOLS, filePath));
     }
-    String pathHashStr = "";
+    String filePathMd5Str = "";
     try {
-      pathHashStr = WorkspaceUtil.encrypt(restultPath);
+      filePathMd5Str = WorkspaceUtil.encrypt(filePath);
     } catch (NoSuchAlgorithmException e) {
-      return Message.error(MessageFormat.format(FILEPATH_ILLEGAL, restultPath));
+      return Message.error(MessageFormat.format(FILEPATH_ILLEGAL, filePath));
     }
-    return Message.ok().data("data", pathHashStr);
+    return Message.ok().data("data", filePathMd5Str);
   }
 
   /**

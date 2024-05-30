@@ -30,5 +30,5 @@ public class WorkSpaceConstants {
   public static final String FILEPATH_ILLEGAL_SYMBOLS =
       "File path illegal symbols : {0} （文件路径结果集路径包含非法字符 : {0}）";
   public static final String FILEPATH_ILLEGAL =
-      "Result set path encryption failed, please check if the path is legal : {0} （结果集路径加密失败，请检查路径是否合法 : {0}）";
+      "Result set path encryption failed, please check if the path is legal : {0} （文件路径加密失败，请检查路径是否合法 : {0}）";
 }
