@@ -18,6 +18,7 @@
 package org.apache.linkis.manager.rm.service
 
 import org.apache.linkis.common.utils.Logging
+import org.apache.linkis.manager.am.conf.AMConfiguration.EC_HIVE_SUPPORT_CLUSTER_RULE_ENABLE
 import org.apache.linkis.manager.am.vo.CanCreateECRes
 import org.apache.linkis.manager.common.constant.RMConstant
 import org.apache.linkis.manager.common.entity.resource._
@@ -27,7 +28,10 @@ import org.apache.linkis.manager.common.protocol.engine.{EngineAskRequest, Engin
 import org.apache.linkis.manager.label.entity.em.EMInstanceLabel
 import org.apache.linkis.manager.rm.domain.RMLabelContainer
 import org.apache.linkis.manager.rm.exception.RMErrorCode
+import org.apache.linkis.manager.rm.external.service.ExternalResourceService
+import org.apache.linkis.manager.rm.external.yarn.YarnResourceIdentifier
 import org.apache.linkis.manager.rm.utils.{RMUtils, UserConfiguration}
+import org.apache.linkis.manager.rm.utils.AcrossClusterRulesJudgeUtils.{originClusterResourceCheck, targetClusterResourceCheck}
 
 import java.text.MessageFormat
 
@@ -36,6 +40,14 @@ abstract class RequestResourceService(labelResourceService: LabelResourceService
   val resourceType: ResourceType = ResourceType.Default
 
   val enableRequest = RMUtils.RM_REQUEST_ENABLE.getValue
+
+  var externalResourceService: ExternalResourceService = null
+
+  def setExternalResourceService(externalResourceService: ExternalResourceService): Unit = {
+    if (externalResourceService == null) {
+      this.externalResourceService = externalResourceService
+    }
+  }
 
   def canRequestResource(
       labelContainer: RMLabelContainer,
@@ -146,6 +158,31 @@ abstract class RequestResourceService(labelResourceService: LabelResourceService
         RESOURCE_LATER_ERROR.getErrorCode,
         RESOURCE_LATER_ERROR.getErrorDesc + labelContainer.getCurrentLabel
       )
+    }
+
+    // hive cluster check
+    if (externalResourceService != null && EC_HIVE_SUPPORT_CLUSTER_RULE_ENABLE) {
+      val requestedDriverAndYarnResource =
+        resource.getMaxResource.asInstanceOf[DriverAndYarnResource]
+      val queueName = requestedDriverAndYarnResource.yarnResource.queueName
+      logger.info(s"hive cluster check with queue: $queueName")
+      val yarnIdentifier = new YarnResourceIdentifier(queueName)
+      val providedYarnResource =
+        externalResourceService.getResource(ResourceType.Yarn, labelContainer, yarnIdentifier)
+      val (maxCapacity, usedCapacity) =
+        (providedYarnResource.getMaxResource, providedYarnResource.getUsedResource)
+      if (engineCreateRequest.getProperties != null) {
+        // judge if is cross cluster task and origin cluster priority first
+        originClusterResourceCheck(engineCreateRequest, maxCapacity, usedCapacity)
+        // judge if is cross cluster task and target cluster priority first
+        targetClusterResourceCheck(
+          labelContainer,
+          engineCreateRequest,
+          maxCapacity,
+          usedCapacity,
+          externalResourceService
+        )
+      }
     }
 
     val requestResource = resource.getMinResource
