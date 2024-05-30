@@ -30,6 +30,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author jefftlin
+ * 2024/5/24
+ */
 public class SqlConnection implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(SqlConnection.class);
@@ -123,27 +127,22 @@ public class SqlConnection implements Closeable {
   public List<MetaColumnInfo> getColumns(String database, String table)
       throws SQLException, ClassNotFoundException {
     List<MetaColumnInfo> columns = new ArrayList<>();
-    String columnSql = "SELECT * FROM `" + database + "`.`" + table + "` WHERE 1 = 2";
-    PreparedStatement ps = null;
+    String columnSql = "SHOW COLUMNS FROM " + database + "." + table;
+    Statement st = null;
     ResultSet rs = null;
-    ResultSetMetaData meta = null;
     try {
-      //      List<String> primaryKeys =
-      //          getPrimaryKeys(getDBConnection(connectMessage, database), database, table);
-      ps = conn.prepareStatement(columnSql);
-      rs = ps.executeQuery();
-      meta = rs.getMetaData();
-      int columnCount = meta.getColumnCount();
-      for (int i = 1; i < columnCount + 1; i++) {
+      st = conn.createStatement();
+      rs = st.executeQuery(columnSql);
+      int index = 1;
+      while (rs.next()) {
         MetaColumnInfo info = new MetaColumnInfo();
-        info.setIndex(i);
-        info.setName(meta.getColumnName(i));
-        info.setType(meta.getColumnTypeName(i));
-        info.setPrimaryKey(false);
+        info.setIndex(index++);
+        info.setName(rs.getString("Field"));
+        info.setType(rs.getString("Type"));
         columns.add(info);
       }
     } finally {
-      closeResource(null, ps, rs);
+      closeResource(null, st, rs);
     }
     return columns;
   }
