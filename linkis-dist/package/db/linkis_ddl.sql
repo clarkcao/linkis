@@ -766,7 +766,8 @@ CREATE TABLE `linkis_cg_manager_label_value_relation` (
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_lvk_lid` (`label_value_key`,`label_id`)
+  UNIQUE KEY `uniq_lvk_lid` (`label_value_key`,`label_id`),
+  KEY `unlabel_id` (`label_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 DROP TABLE IF EXISTS `linkis_cg_manager_label_resource`;
