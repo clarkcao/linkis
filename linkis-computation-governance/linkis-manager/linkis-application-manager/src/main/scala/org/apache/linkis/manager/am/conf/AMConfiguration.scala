@@ -126,8 +126,8 @@ object AMConfiguration {
   val EC_REUSE_WITH_RESOURCE_WITH_ECS: String =
     CommonVars("linkis.ec.reuse.with.resource.with.ecs", "spark,hive,shell,python").getValue
 
-  val EC_HIVE_SUPPORT_CLUSTER_RULE_ENABLE =
-    CommonVars("linkis.ec.hive.support.cluster.rule.enable", false).getValue
+  val SUPPORT_CLUSTER_RULE_EC_TYPES: String =
+    CommonVars("linkis.support.cluster.rule.ec.types", "").getValue
 
   private def getDefaultMultiEngineUser(): String = {
     val jvmUser = Utils.getJvmUser
