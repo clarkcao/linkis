@@ -158,3 +158,6 @@ INNER JOIN linkis_cg_manager_label label ON config.engine_conn_type = 'hive' and
 insert into `linkis_ps_configuration_config_value` (`config_key_id`, `config_value`, `config_label_id`)
 (select `relation`.`config_key_id` AS `config_key_id`, '' AS `config_value`, `relation`.`engine_type_label_id` AS `config_label_id` FROM linkis_ps_configuration_key_engine_relation relation
 INNER JOIN linkis_cg_manager_label label ON relation.engine_type_label_id = label.id and relation.config_key_id = (select id FROM  linkis_ps_configuration_config_key where `key`="mapreduce.job.reduce.slowstart.completedmaps")AND label.label_value = '*-*,hive-2.3.3');
+
+
+update linkis_ps_dm_datasource_type_key set value_regex='^[0-9A-Za-z_-\\s]+$' where data_source_type_id=18 and `key`='username';
