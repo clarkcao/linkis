@@ -279,11 +279,10 @@ class DefaultEngineAskEngineService
    * algorithm, for example, the default configuration of appconn is 10, and the appconn requested
    * at the same time can only be 10
    *   1. Returns as unique keys, the key labels of userCreator, engineTypelabel, and tenant label
-   *   2. Semaphore is the corresponding number of tokens
+   *      2. Semaphore is the corresponding number of tokens
    *
    * 限流逻辑，针对引擎类型，通过令牌算法进行限流，比如appconn 默认配置的10同时进行请求的appconn只能为10
-   *   1. 返回为唯一键，为userCreator、engineTypelabel和tenant label的key标签
-   *   2. Semaphore 为对应的令牌数
+   *   1. 返回为唯一键，为userCreator、engineTypelabel和tenant label的key标签 2. Semaphore 为对应的令牌数
    *
    * @param labels
    * @return
