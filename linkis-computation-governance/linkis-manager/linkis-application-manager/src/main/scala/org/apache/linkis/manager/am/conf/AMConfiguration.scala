@@ -126,6 +126,12 @@ object AMConfiguration {
   val EC_REUSE_WITH_RESOURCE_WITH_ECS: String =
     CommonVars("linkis.ec.reuse.with.resource.with.ecs", "spark,hive,shell,python").getValue
 
+  val SUPPORT_CLUSTER_RULE_EC_TYPES: String =
+    CommonVars("linkis.support.cluster.rule.ec.types", "").getValue
+
+  val HIVE_CLUSTER_EC_EXECUTE_ONCE_RULE_ENABLE =
+    CommonVars("linkis.hive.cluster.ec.execute.once.rule.enable", true).getValue
+
   val AM_ENGINE_ASK_MAX_NUMBER =
     CommonVars("linkis.am.engine.ask.max.number", "appconn=10,trino=10").getValue
       .split(",")

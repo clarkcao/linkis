@@ -15,19 +15,8 @@
  * limitations under the License.
  */
 
-package org.apache.linkis.basedatamanager.server.service;
+package org.apache.linkis.monitor.jobhistory.index
 
-import org.apache.linkis.basedatamanager.server.domain.GatewayAuthTokenEntity;
+import org.apache.linkis.monitor.core.ob.SingleObserverEvent
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.github.pagehelper.PageInfo;
-
-/**
- * @description Database operation Service for the [linkis_mg_gateway_auth_token] table
- * @createDate 2022-07-13 10:42:13
- */
-public interface GatewayAuthTokenService extends IService<GatewayAuthTokenEntity> {
-  PageInfo getListByPage(String searchName, Integer currentPage, Integer pageSize);
-
-  GatewayAuthTokenEntity getEntityByToken(String token);
-}
+class JobIndexHitEvent extends SingleObserverEvent
