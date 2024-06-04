@@ -126,6 +126,21 @@ object AMConfiguration {
   val EC_REUSE_WITH_RESOURCE_WITH_ECS: String =
     CommonVars("linkis.ec.reuse.with.resource.with.ecs", "spark,hive,shell,python").getValue
 
+  val AM_ENGINE_ASK_MAX_NUMBER =
+    CommonVars("linkis.am.engine.ask.max.number", "appconn=10,trino=10").getValue
+      .split(",")
+      .map { keyValue =>
+        val array = keyValue.split("=")
+        if (array.length != 2) {
+          throw new IllegalArgumentException(
+            s"linkis.am.engine.ask.max.number value is illegal, value is $keyValue"
+          )
+        } else {
+          (array(0), array(1).toInt)
+        }
+      }
+      .toMap
+
   private def getDefaultMultiEngineUser(): String = {
     val jvmUser = Utils.getJvmUser
     s""" {jdbc:"$jvmUser", es: "$jvmUser", presto:"$jvmUser", appconn:"$jvmUser", openlookeng:"$jvmUser", trino:"$jvmUser", io_file:"root"}"""
