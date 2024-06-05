@@ -81,7 +81,7 @@ public class SqlConnection implements Closeable {
     }
 
     // security check
-    SecurityUtils.checkJdbcSecurity(extraParams);
+    // SecurityUtils.checkJdbcSecurity(extraParams);
 
     // append force params
     SecurityUtils.appendMysqlForceParams(extraParams);

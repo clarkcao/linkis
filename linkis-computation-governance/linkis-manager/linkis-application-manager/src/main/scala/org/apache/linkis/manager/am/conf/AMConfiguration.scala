@@ -87,7 +87,7 @@ object AMConfiguration {
 
   val MULTI_USER_ENGINE_TYPES = CommonVars(
     "wds.linkis.multi.user.engine.types",
-    "jdbc,es,presto,io_file,appconn,openlookeng,trino"
+    "jdbc,es,presto,io_file,appconn,openlookeng,trino,jobserver"
   )
 
   val ALLOW_BATCH_KILL_ENGINE_TYPES =
@@ -126,9 +126,30 @@ object AMConfiguration {
   val EC_REUSE_WITH_RESOURCE_WITH_ECS: String =
     CommonVars("linkis.ec.reuse.with.resource.with.ecs", "spark,hive,shell,python").getValue
 
+  val SUPPORT_CLUSTER_RULE_EC_TYPES: String =
+    CommonVars("linkis.support.cluster.rule.ec.types", "").getValue
+
+  val HIVE_CLUSTER_EC_EXECUTE_ONCE_RULE_ENABLE =
+    CommonVars("linkis.hive.cluster.ec.execute.once.rule.enable", true).getValue
+
+  val AM_ENGINE_ASK_MAX_NUMBER =
+    CommonVars("linkis.am.engine.ask.max.number", "appconn=10,trino=10").getValue
+      .split(",")
+      .map { keyValue =>
+        val array = keyValue.split("=")
+        if (array.length != 2) {
+          throw new IllegalArgumentException(
+            s"linkis.am.engine.ask.max.number value is illegal, value is $keyValue"
+          )
+        } else {
+          (array(0), array(1).toInt)
+        }
+      }
+      .toMap
+
   private def getDefaultMultiEngineUser(): String = {
     val jvmUser = Utils.getJvmUser
-    s""" {jdbc:"$jvmUser", es: "$jvmUser", presto:"$jvmUser", appconn:"$jvmUser", openlookeng:"$jvmUser", trino:"$jvmUser", io_file:"root"}"""
+    s""" {jdbc:"$jvmUser", es: "$jvmUser", presto:"$jvmUser", appconn:"$jvmUser", openlookeng:"$jvmUser", trino:"$jvmUser", io_file:"root", jobserver:"$jvmUser"}"""
   }
 
   def isMultiUserEngine(engineType: String): Boolean = {
