@@ -147,7 +147,7 @@ public class GatewayAuthTokenRestfulApi {
   @RequestMapping(path = "/check", method = RequestMethod.GET)
   public Message checkAuth(HttpServletRequest request, String token, String checkName) {
     ModuleUserUtils.getOperationUser(
-            request, "Try to check auth token with checkName:" + checkName);
+        request, "Try to check auth token with checkName:" + checkName);
     Boolean checkResult = false;
     // 参数校验
     if (StringUtils.isBlank(checkName)) {
